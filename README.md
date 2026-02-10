@@ -1,13 +1,13 @@
 # Smart Task & Workflow Management System (STWMS)
 
-## 📌 Project Description
+## Project Description
 Smart Task & Workflow Management System (STWMS) is a full-stack web application designed to help teams manage projects, tasks, and workflows efficiently. The system supports role-based access control, task lifecycle management, and real-time collaboration.
 
 This project is being developed as part of the **SESD course** and follows proper **software engineering and system design principles**, with a strong focus on backend development.
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 ### Backend (Primary Focus)
 - Node.js
@@ -15,8 +15,8 @@ This project is being developed as part of the **SESD course** and follows prope
 - TypeScript
 - JWT Authentication
 - RESTful APIs
-- PostgreSQL / MySQL
-- Prisma / TypeORM
+- MySQL
+- Prisma
 
 ### Frontend
 - React
@@ -25,7 +25,7 @@ This project is being developed as part of the **SESD course** and follows prope
 
 ---
 
-## 🎯 Key Features
+## Key Features
 - User authentication and authorization (JWT)
 - Role-based access control (Admin, Manager, Employee)
 - Project management
@@ -36,4 +36,61 @@ This project is being developed as part of the **SESD course** and follows prope
 
 ---
 
-## 📁 Project Structure
+## Project Structure
+```bash
+SESD-STWMS/
+│
+├── idea.md
+├── useCaseDiagram.md
+├── sequenceDiagram.md
+├── classDiagram.md
+├── ErDiagram.md
+│
+├── backend/
+│ └── src/
+│ ├── controllers/
+│ ├── services/
+│ ├── repositories/
+│ ├── models/
+│ ├── routes/
+│ ├── middlewares/
+│ └── config/
+│
+└── frontend/
+└── src/
+```
+
+---
+
+## Software Engineering Practices Used
+- Object-Oriented Programming (OOP)
+- SOLID principles
+- MVC architecture
+- Service and Repository patterns
+- Proper error handling and validation
+- Layered backend design
+
+---
+
+## Setup Instructions
+
+### Backend
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm start
+```
+
+---
+
+### Author
+- Devaansh Kathuria
+- 2024-B-02032007
+---
