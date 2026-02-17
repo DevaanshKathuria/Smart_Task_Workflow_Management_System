@@ -19,6 +19,7 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(EMPLOYEE)
+  projects  Project[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -27,4 +28,14 @@ enum Role {
   ADMIN
   MANAGER
   EMPLOYEE
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  managerId   Int
+  manager     User     @relation(fields: [managerId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
