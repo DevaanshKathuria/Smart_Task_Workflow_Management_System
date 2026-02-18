@@ -1,6 +1,6 @@
 # Entity Relationship (ER) Diagram
 
-[!image](assets/erDiagram.png)
+![image](assets/ERDiagram.png)
 
 ## Entities and Attributes
 
