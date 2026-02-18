@@ -1,5 +1,7 @@
 # Use Case Diagram
 
+![image](assets/useCaseDiagram.png)
+
 ## Actors
 - Admin
 - Manager

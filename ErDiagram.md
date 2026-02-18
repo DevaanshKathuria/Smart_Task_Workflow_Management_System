@@ -1,5 +1,7 @@
 # Entity Relationship (ER) Diagram
 
+[!image](assets/erDiagram.png)
+
 ## Entities and Attributes
 
 ### users

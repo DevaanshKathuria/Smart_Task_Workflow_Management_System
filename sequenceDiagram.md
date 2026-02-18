@@ -1,5 +1,7 @@
 # Sequence Diagram – Task Assignment Flow
 
+![image](assets/sequenceDiagram.png)
+
 ## Description
 This sequence diagram represents the end-to-end flow of assigning a task to an employee by a manager.
 

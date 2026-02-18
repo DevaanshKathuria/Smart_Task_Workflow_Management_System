@@ -1,5 +1,7 @@
 # Class Diagram
 
+[!image](assets/classDiagram.png)
+
 ## User (Abstract Class)
 - id: string
 - name: string
