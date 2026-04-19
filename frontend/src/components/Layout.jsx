@@ -3,80 +3,93 @@ import { useAuth } from '../context/AuthContext';
 import { notificationAPI } from '../api';
 
 export default function Layout({ currentPage, setCurrentPage, children }) {
-  const { user, logout, isAdmin, isManager } = useAuth();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { user, logout, isAdmin } = useAuth();
+  const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    const fetchUnread = async () => {
+    const fetch = async () => {
       try {
         const res = await notificationAPI.getAll();
-        setUnreadCount(res.data.filter(n => !n.isRead).length);
+        setUnread(res.data.filter(n => !n.isRead).length);
       } catch {}
     };
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
-    return () => clearInterval(interval);
+    fetch();
+    const iv = setInterval(fetch, 30000);
+    return () => clearInterval(iv);
   }, []);
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
-    { id: 'projects', label: 'Projects', icon: '📁' },
-    { id: 'tasks', label: 'Tasks', icon: '📋' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔', badge: unreadCount },
-    ...(isAdmin ? [{ id: 'users', label: 'Users', icon: '👥' }] : []),
+  const nav = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'projects', label: 'Projects' },
+    { id: 'tasks', label: 'Tasks' },
+    { id: 'notifications', label: 'Notifications', badge: unread },
+    ...(isAdmin ? [{ id: 'users', label: 'Users' }] : []),
   ];
+
+  const pageLabels = {
+    dashboard: 'Dashboard', projects: 'Projects', tasks: 'Tasks',
+    notifications: 'Notifications', users: 'Users',
+  };
 
   return (
     <div className="layout">
       <aside className="sidebar">
-        <div className="sidebar-logo">
-          <h1>STWMS</h1>
-          <p>Workflow Management</p>
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-name">STWMS</div>
+          <div className="sidebar-brand-sub">Workflow Management</div>
         </div>
+
         <nav className="sidebar-nav">
-          {navItems.map(item => (
+          {nav.map(item => (
             <button
               key={item.id}
               id={`nav-${item.id}`}
               className={`nav-item ${currentPage === item.id ? 'active' : ''}`}
               onClick={() => setCurrentPage(item.id)}
             >
-              <span className="icon">{item.icon}</span>
-              <span style={{ flex: 1 }}>{item.label}</span>
+              {item.label}
               {item.badge > 0 && (
-                <span style={{ background: 'var(--danger)', color: 'white', borderRadius: '20px', padding: '1px 7px', fontSize: 11, fontWeight: 700 }}>
-                  {item.badge}
-                </span>
+                <span className="nav-badge">{item.badge}</span>
               )}
             </button>
           ))}
         </nav>
-        <div className="sidebar-user">
-          <div className="sidebar-user-info">
-            <div className="avatar">{user?.name?.[0] || 'U'}</div>
+
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="avatar">
+              {user?.name?.[0]?.toUpperCase() || 'U'}
+            </div>
             <div>
               <div className="sidebar-user-name">{user?.name}</div>
               <div className="sidebar-user-role">{user?.role}</div>
             </div>
           </div>
-          <button id="btn-logout" className="btn btn-secondary w-full btn-sm" onClick={logout}>
-            ⎋ Sign Out
+          <button id="btn-logout" className="btn btn-ghost w-full btn-sm" onClick={logout}>
+            Sign out
           </button>
         </div>
       </aside>
+
       <main className="main-content">
         <div className="topbar">
-          <span className="topbar-left">Smart Task & Workflow Management System</span>
-          <div className="topbar-right">
+          <span className="topbar-breadcrumb">
+            {pageLabels[currentPage] || 'Dashboard'}
+          </span>
+          <div className="topbar-actions">
             <button
-              className="btn btn-secondary btn-sm notif-badge"
-              onClick={() => setCurrentPage('notifications')}
               id="topbar-notif"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setCurrentPage('notifications')}
+              style={{ position: 'relative' }}
             >
-              🔔
-              {unreadCount > 0 && <span className="notif-badge-count">{unreadCount}</span>}
+              Notifications
+              {unread > 0 && (
+                <span className="nav-badge" style={{ position: 'absolute', top: -4, right: -4 }}>
+                  {unread}
+                </span>
+              )}
             </button>
-            <div className="avatar">{user?.name?.[0] || 'U'}</div>
           </div>
         </div>
         {children}

@@ -13,69 +13,85 @@ export default function Users() {
     try {
       const res = await userAPI.getAll();
       setUsers(res.data);
-    } catch (e) { console.error(e); }
+    } catch {}
     finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
-  const handleRoleChange = async (id, role) => {
-    if (id === me.id) { alert("You can't change your own role."); return; }
+  const changeRole = async (id, role) => {
+    if (id === me.id) { alert("You cannot change your own role."); return; }
     setUpdatingId(id);
     try { await userAPI.updateRole(id, role); load(); }
-    catch (e) { alert(e.response?.data?.message || 'Failed to update role'); }
+    catch (err) { alert(err.response?.data?.message || 'Failed'); }
     finally { setUpdatingId(null); }
   };
 
-  if (loading) return <div className="page-loader"><div className="spinner" /><span>Loading users...</span></div>;
+  if (loading) return <div className="page-loader"><span className="spinner" /> Loading...</div>;
 
   return (
-    <>
+    <div className="page">
       <div className="page-header">
-        <h1 className="page-title">👥 Users</h1>
-        <p className="page-subtitle">{users.length} user{users.length !== 1 ? 's' : ''} registered</p>
+        <div className="page-title">Users</div>
+        <div className="page-subtitle">{users.length} registered user{users.length !== 1 ? 's' : ''}</div>
       </div>
-      <div className="page-body">
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th>{isAdmin && <th>Actions</th>}</tr>
-            </thead>
-            <tbody>
-              {users.map(u => (
-                <tr key={u.id}>
-                  <td>
-                    <div className="flex gap-8" style={{ alignItems: 'center' }}>
-                      <div className="avatar" style={{ width: 32, height: 32, fontSize: 13 }}>{u.name[0]}</div>
-                      <span style={{ fontWeight: 600 }}>{u.name}{u.id === me.id && <span className="text-muted text-sm"> (you)</span>}</span>
+
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined</th>
+              {isAdmin && <th>Change role</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(u => (
+              <tr key={u.id}>
+                <td>
+                  <div className="flex-center gap-8">
+                    <div className="avatar" style={{ width: 28, height: 28, fontSize: 11 }}>
+                      {u.name[0].toUpperCase()}
                     </div>
+                    <span style={{ fontWeight: 500 }}>
+                      {u.name}
+                      {u.id === me.id && (
+                        <span className="text-dim text-xs" style={{ marginLeft: 6 }}>(you)</span>
+                      )}
+                    </span>
+                  </div>
+                </td>
+                <td className="text-muted">{u.email}</td>
+                <td><span className={`badge badge-${u.role.toLowerCase()}`}>{u.role}</span></td>
+                <td className="text-dim text-sm">
+                  {new Date(u.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </td>
+                {isAdmin && (
+                  <td>
+                    {u.id !== me.id ? (
+                      <select
+                        className="form-select"
+                        style={{ padding: '4px 10px', fontSize: 12, width: 'auto' }}
+                        value={u.role}
+                        disabled={updatingId === u.id}
+                        onChange={e => changeRole(u.id, e.target.value)}
+                      >
+                        <option value="EMPLOYEE">Employee</option>
+                        <option value="MANAGER">Manager</option>
+                        <option value="ADMIN">Admin</option>
+                      </select>
+                    ) : (
+                      <span className="text-dim text-sm">—</span>
+                    )}
                   </td>
-                  <td className="text-muted">{u.email}</td>
-                  <td><span className={`badge badge-${u.role.toLowerCase()}`}>{u.role}</span></td>
-                  <td className="text-muted text-sm">{new Date(u.createdAt).toLocaleDateString()}</td>
-                  {isAdmin && (
-                    <td>
-                      {u.id !== me.id ? (
-                        <select
-                          className="form-select"
-                          style={{ padding: '4px 8px', fontSize: 12, width: 'auto' }}
-                          value={u.role}
-                          disabled={updatingId === u.id}
-                          onChange={e => handleRoleChange(u.id, e.target.value)}
-                        >
-                          <option value="EMPLOYEE">EMPLOYEE</option>
-                          <option value="MANAGER">MANAGER</option>
-                          <option value="ADMIN">ADMIN</option>
-                        </select>
-                      ) : <span className="text-muted text-sm">—</span>}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </>
+    </div>
   );
 }

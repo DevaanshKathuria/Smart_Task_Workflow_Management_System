@@ -2,144 +2,114 @@ import { useState, useEffect } from 'react';
 import { projectAPI, taskAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 
+const STATUS_LABELS = { TODO: 'To Do', IN_PROGRESS: 'In Progress', REVIEW: 'Review', COMPLETED: 'Completed' };
+
 export default function Dashboard() {
-  const { user, isAdmin, isManager } = useAuth();
-  const [stats, setStats] = useState({ projects: 0, tasks: 0, myTasks: 0, completed: 0 });
-  const [recentTasks, setRecentTasks] = useState([]);
+  const { user, isManager } = useAuth();
+  const [stats, setStats] = useState({ projects: 0, total: 0, mine: 0, done: 0 });
+  const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [projects, myTasks] = await Promise.all([
-          projectAPI.getAll(),
-          taskAPI.getMyTasks(),
-        ]);
-        const allMyTasks = myTasks.data;
-        const completed = allMyTasks.filter(t => t.status === 'COMPLETED').length;
-
-        let allTasks = allMyTasks;
+        const [pRes, myRes] = await Promise.all([projectAPI.getAll(), taskAPI.getMyTasks()]);
+        const mine = myRes.data;
+        let total = mine.length;
         if (isManager) {
-          const allRes = await taskAPI.getAll();
-          allTasks = allRes.data;
+          const all = await taskAPI.getAll();
+          total = all.data.length;
         }
-
         setStats({
-          projects: projects.data.length,
-          tasks: allTasks.length,
-          myTasks: allMyTasks.length,
-          completed,
+          projects: pRes.data.length,
+          total,
+          mine: mine.length,
+          done: mine.filter(t => t.status === 'COMPLETED').length,
         });
-        setRecentTasks(allMyTasks.slice(0, 5));
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
+        setRecent(mine.slice(0, 8));
+      } catch {}
+      finally { setLoading(false); }
     };
     load();
   }, [isManager]);
 
-  const getStatusBadge = (status) => {
-    const labels = { TODO: 'To Do', IN_PROGRESS: 'In Progress', REVIEW: 'Review', COMPLETED: 'Completed' };
-    return <span className={`badge badge-${status.toLowerCase()}`}>{labels[status] || status}</span>;
-  };
-
-  const getPriorityBadge = (priority) => (
-    <span className={`badge badge-${priority.toLowerCase()}`}>{priority}</span>
-  );
-
   if (loading) return (
-    <div className="page-loader">
-      <div className="spinner" />
-      <span>Loading dashboard...</span>
-    </div>
+    <div className="page-loader"><span className="spinner" /> Loading...</div>
   );
 
   return (
-    <>
+    <div className="page">
       <div className="page-header">
-        <div className="flex-between">
+        <div className="page-title-row">
           <div>
-            <h1 className="page-title">👋 Welcome, {user?.name?.split(' ')[0]}!</h1>
-            <p className="page-subtitle">Here's what's happening in your workspace today.</p>
+            <div className="page-title">
+              Welcome back, {user?.name?.split(' ')[0]}
+            </div>
+            <div className="page-subtitle">Here's an overview of your workspace</div>
           </div>
           <span className={`badge badge-${user?.role?.toLowerCase()}`}>{user?.role}</span>
         </div>
       </div>
 
-      <div className="page-body">
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'var(--accent-light)' }}>📁</div>
-            <div>
-              <div className="stat-value">{stats.projects}</div>
-              <div className="stat-label">Total Projects</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'var(--info-light)' }}>📋</div>
-            <div>
-              <div className="stat-value">{isManager ? stats.tasks : stats.myTasks}</div>
-              <div className="stat-label">{isManager ? 'All Tasks' : 'My Tasks'}</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'var(--success-light)' }}>✅</div>
-            <div>
-              <div className="stat-value">{stats.completed}</div>
-              <div className="stat-label">Completed</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'var(--warning-light)' }}>⏳</div>
-            <div>
-              <div className="stat-value">{stats.myTasks - stats.completed}</div>
-              <div className="stat-label">Pending</div>
-            </div>
-          </div>
+      <div className="stats-row">
+        <div className="stat-cell">
+          <div className="stat-value">{stats.projects}</div>
+          <div className="stat-label">Projects</div>
         </div>
-
-        <div className="card">
-          <div className="flex-between mb-16">
-            <h2 style={{ fontSize: '16px', fontWeight: '700' }}>My Recent Tasks</h2>
-          </div>
-          {recentTasks.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📭</div>
-              <div className="empty-title">No tasks assigned</div>
-              <div className="empty-desc">You don't have any tasks yet.</div>
-            </div>
-          ) : (
-            <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Task</th>
-                    <th>Project</th>
-                    <th>Status</th>
-                    <th>Priority</th>
-                    <th>Due Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentTasks.map(task => (
-                    <tr key={task.id}>
-                      <td><strong>{task.title}</strong></td>
-                      <td className="text-muted">{task.project?.name}</td>
-                      <td>{getStatusBadge(task.status)}</td>
-                      <td>{getPriorityBadge(task.priority)}</td>
-                      <td className="text-muted text-sm">
-                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+        <div className="stat-cell">
+          <div className="stat-value">{isManager ? stats.total : stats.mine}</div>
+          <div className="stat-label">{isManager ? 'Total tasks' : 'My tasks'}</div>
+        </div>
+        <div className="stat-cell">
+          <div className="stat-value stat-accent">{stats.done}</div>
+          <div className="stat-label">Completed</div>
+        </div>
+        <div className="stat-cell">
+          <div className="stat-value">{stats.mine - stats.done}</div>
+          <div className="stat-label">Pending</div>
         </div>
       </div>
-    </>
+
+      <div style={{ marginBottom: 16 }}>
+        <div className="flex-between mb-16">
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)' }}>
+            My assigned tasks
+          </div>
+        </div>
+        {recent.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-title">No tasks assigned</div>
+            <div className="empty-sub">Tasks assigned to you will appear here</div>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Project</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.map(t => (
+                  <tr key={t.id}>
+                    <td style={{ fontWeight: 500 }}>{t.title}</td>
+                    <td className="text-muted">{t.project?.name}</td>
+                    <td><span className={`badge badge-${t.status.toLowerCase()}`}>{STATUS_LABELS[t.status]}</span></td>
+                    <td><span className={`badge badge-${t.priority.toLowerCase()}`}>{t.priority}</span></td>
+                    <td className="text-dim text-sm">
+                      {t.dueDate ? new Date(t.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
