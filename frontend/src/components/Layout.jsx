@@ -23,7 +23,7 @@ export default function Layout({ currentPage, setCurrentPage, children }) {
     { id: 'projects', label: 'Projects' },
     { id: 'tasks', label: 'Tasks' },
     { id: 'notifications', label: 'Notifications', badge: unread },
-    ...(isAdmin ? [{ id: 'users', label: 'Users' }] : []),
+    ...(isManager ? [{ id: 'users', label: 'Users' }] : []),
   ];
 
   const pageLabels = {
