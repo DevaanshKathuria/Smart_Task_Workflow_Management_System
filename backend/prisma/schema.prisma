@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = env("DATABASE_PROVIDER")
   url      = env("DATABASE_URL")
 }
 
@@ -13,24 +13,24 @@ model User {
   email         String         @unique
   password      String
   role          String         @default("EMPLOYEE")
-  projects      Project[]      @relation("ManagedProjects")
-  assignedTasks Task[]         @relation("AssignedTasks")
-  notifications Notification[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  projects      Project[]      @relation("ProjectManager")
+  tasks         Task[]         @relation("TaskAssignee")
+  notifications Notification[]
 }
 
 model Project {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
   startDate   DateTime?
   endDate     DateTime?
   managerId   Int
-  manager     User     @relation("ManagedProjects", fields: [managerId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  manager     User      @relation("ProjectManager", fields: [managerId], references: [id])
   tasks       Task[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
 
 model Task {
@@ -41,11 +41,11 @@ model Task {
   priority     String    @default("MEDIUM")
   dueDate      DateTime?
   projectId    Int
-  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   assignedToId Int?
-  assignedTo   User?     @relation("AssignedTasks", fields: [assignedToId], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo   User?     @relation("TaskAssignee", fields: [assignedToId], references: [id])
 }
 
 model Notification {
@@ -53,6 +53,6 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
