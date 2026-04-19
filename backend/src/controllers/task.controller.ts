@@ -40,7 +40,9 @@ export class TaskController {
 
   async getByProject(req: Request, res: Response) {
     try {
-      const tasks = await taskService.getTasksByProject(Number(req.params.projectId));
+      const projectId = Number(req.params.projectId);
+      if (isNaN(projectId)) return res.status(400).json({ message: "Invalid project ID" });
+      const tasks = await taskService.getTasksByProject(projectId);
       res.json(tasks);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -58,7 +60,9 @@ export class TaskController {
 
   async getById(req: Request, res: Response) {
     try {
-      const task = await taskService.getTaskById(Number(req.params.id));
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid task ID" });
+      const task = await taskService.getTaskById(id);
       res.json(task);
     } catch (error: any) {
       res.status(404).json({ message: error.message });
@@ -67,8 +71,10 @@ export class TaskController {
 
   async update(req: Request, res: Response) {
     try {
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid task ID" });
       const { title, description, status, priority, dueDate, assignedToId } = req.body;
-      const task = await taskService.updateTask(Number(req.params.id), {
+      const task = await taskService.updateTask(id, {
         title,
         description,
         status,
@@ -84,7 +90,9 @@ export class TaskController {
 
   async delete(req: Request, res: Response) {
     try {
-      await taskService.deleteTask(Number(req.params.id));
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid task ID" });
+      await taskService.deleteTask(id);
       res.json({ message: "Task deleted successfully" });
     } catch (error: any) {
       res.status(400).json({ message: error.message });

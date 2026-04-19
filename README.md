@@ -1,6 +1,6 @@
 # Smart Task & Workflow Management System (STWMS)
 
-> **🔴 Live Demo:** [https://stwms.vercel.app](https://stwms.vercel.app) *(deploy and update this link)*
+> **Live Demo:** 
 
 ## Project Description
 Smart Task & Workflow Management System (STWMS) is a full-stack web application designed to help teams manage projects, tasks, and workflows efficiently. The system supports **role-based access control** (Admin, Manager, Employee), task lifecycle management (To Do → In Progress → Review → Completed), and automated notifications.

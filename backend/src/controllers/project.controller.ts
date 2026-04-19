@@ -34,7 +34,9 @@ export class ProjectController {
 
   async getById(req: Request, res: Response) {
     try {
-      const project = await projectService.getProjectById(Number(req.params.id));
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid project ID" });
+      const project = await projectService.getProjectById(id);
       res.json(project);
     } catch (error: any) {
       res.status(404).json({ message: error.message });
@@ -43,8 +45,10 @@ export class ProjectController {
 
   async update(req: Request, res: Response) {
     try {
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid project ID" });
       const { name, description, startDate, endDate } = req.body;
-      const project = await projectService.updateProject(Number(req.params.id), {
+      const project = await projectService.updateProject(id, {
         name,
         description,
         startDate: startDate ? new Date(startDate) : undefined,
@@ -58,7 +62,9 @@ export class ProjectController {
 
   async delete(req: Request, res: Response) {
     try {
-      await projectService.deleteProject(Number(req.params.id));
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid project ID" });
+      await projectService.deleteProject(id);
       res.json({ message: "Project deleted successfully" });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
